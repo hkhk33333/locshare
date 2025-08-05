@@ -121,9 +121,14 @@ class MainActivity : ComponentActivity() {
                                     currentLocation = currentLocation,
                                     allLocations = allLocations,
                                     onMyLocationClick = { 
-                                        startLocationUpdates()
-                                        friendToFocus = null
-                                        shouldCenterOnMyLocation = true
+                                        // Check permissions before starting location updates
+                                        if (hasLocationPermissions()) {
+                                            startLocationUpdates()
+                                            friendToFocus = null
+                                            shouldCenterOnMyLocation = true
+                                        } else {
+                                            checkLocationPermissions()
+                                        }
                                     },
                                     onSignOut = { authViewModel.signOut() },
                                     onNavigateToFriends = { currentScreen = Screen.FRIENDS },
@@ -158,6 +163,17 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun hasLocationPermissions(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
     
     private fun checkLocationPermissions() {
         when {
@@ -174,18 +190,13 @@ class MainActivity : ComponentActivity() {
                 startBackgroundLocationService()
             }
             else -> {
-                // Request permissions
-                val permissions = mutableListOf(
+                // Request basic location permissions first (background location must be requested separately)
+                val permissions = arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
                 )
                 
-                // Add background location permission for Android 10+
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                }
-                
-                requestPermissionLauncher.launch(permissions.toTypedArray())
+                requestPermissionLauncher.launch(permissions)
             }
         }
     }
@@ -237,7 +248,9 @@ class MainActivity : ComponentActivity() {
                 Looper.getMainLooper()
             )
         } catch (e: SecurityException) {
-            // Handle permission issue
+            Log.w("MainActivity", "Location permission denied", e)
+            // Trigger permission request if not granted
+            checkLocationPermissions()
         }
     }
     
