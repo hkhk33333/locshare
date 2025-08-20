@@ -65,5 +65,11 @@ private fun DiscordLoginScreen(onContinue: () -> Unit) {
         ) {
             Text(text = "Continue with Discord")
         }
+        Button(
+            onClick = onContinue,
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
+            Text(text = "Continue")
+        }
     }
 }
