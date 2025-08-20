@@ -36,6 +36,11 @@
             android:exported="false"
             android:label="Discord (Preview)"
             android:theme="@style/Theme.Testing" />
+        <activity
+            android:name=".discord.DiscordMainActivity"
+            android:exported="false"
+            android:label="Discord"
+            android:theme="@style/Theme.Testing" />
         
         <service
             android:name=".LocationService"
