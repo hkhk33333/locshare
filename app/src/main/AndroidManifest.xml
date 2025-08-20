@@ -46,6 +46,20 @@
             android:exported="false"
             android:label="Discord Login"
             android:theme="@style/Theme.Testing" />
+        <activity
+            android:name=".discord.auth.DiscordAuthCallbackActivity"
+            android:exported="true"
+            android:label="Discord Callback"
+            android:theme="@style/Theme.Testing">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="redirect"
+                    android:scheme="mysku" />
+            </intent-filter>
+        </activity>
         
         <service
             android:name=".LocationService"
