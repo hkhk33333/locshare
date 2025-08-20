@@ -1,21 +1,22 @@
-package com.test.testing.api
+package com.test.testing.discord.api
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * Retrofit client for the Discord + Backend system (skeleton).
+ * No explicit OkHttp configuration to keep PR small and dependency-free.
+ */
 object ApiClient {
     // Placeholder base URL; configure via build config when wiring network calls.
-    private const val BASE_URL = "https://example.com/api/"
+    private const val BASE_URL: String = "https://example.com/"
 
-    private val retrofit: Retrofit by lazy {
+    val api: MySkuApiService by lazy {
         Retrofit
             .Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
-
-    val locationApiService: LocationApiService by lazy {
-        retrofit.create(LocationApiService::class.java)
+            .create(MySkuApiService::class.java)
     }
 }
