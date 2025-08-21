@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import com.test.testing.discord.api.ApiClient
-import com.test.testing.discord.api.model.TokenRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,17 +31,14 @@ class DiscordAuthCallbackActivity : ComponentActivity() {
         }
 
         if (!code.isNullOrEmpty() && !verifier.isNullOrEmpty()) {
-            val service = ApiClient.create(this)
-            val request =
-                TokenRequest(code = code, codeVerifier = verifier, redirectUri = com.test.testing.BuildConfig.DISCORD_REDIRECT_URI)
+            val repo = DiscordAuthRepositoryImpl(this, ApiClient.create(this))
             lifecycleScope.launch(Dispatchers.Main) {
-                try {
-                    val response = withContext(Dispatchers.IO) { service.exchangeToken(request) }
-                    val token = response.accessToken
-                    if (token.isNotEmpty()) {
-                        TokenStore.put(this@DiscordAuthCallbackActivity, token)
-                        TokenStore.clearCodeVerifier(this@DiscordAuthCallbackActivity)
-                        TokenStore.clearState(this@DiscordAuthCallbackActivity)
+                val result =
+                    withContext(Dispatchers.IO) {
+                        repo.exchangeAndPersistToken(code, verifier, com.test.testing.BuildConfig.DISCORD_REDIRECT_URI)
+                    }
+                result
+                    .onSuccess {
                         Toast.makeText(this@DiscordAuthCallbackActivity, "Login successful", Toast.LENGTH_SHORT).show()
                         startActivity(
                             Intent(this@DiscordAuthCallbackActivity, com.test.testing.discord.DiscordMainActivity::class.java).apply {
@@ -50,6 +46,8 @@ class DiscordAuthCallbackActivity : ComponentActivity() {
                             },
                         )
                         finish()
+                    }.onFailure {
+                        Toast.makeText(this@DiscordAuthCallbackActivity, "Token exchange failed", Toast.LENGTH_SHORT).show()
                         startActivity(
                             Intent(this@DiscordAuthCallbackActivity, DiscordLoginActivity::class.java).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -57,9 +55,6 @@ class DiscordAuthCallbackActivity : ComponentActivity() {
                         )
                         finish()
                     }
-                } catch (_: Throwable) {
-                    Toast.makeText(this@DiscordAuthCallbackActivity, "Token exchange failed", Toast.LENGTH_SHORT).show()
-                }
             }
         } else {
             // Missing parameters; return to login
