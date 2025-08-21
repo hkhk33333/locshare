@@ -17,10 +17,14 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.test.testing.discord.auth.DiscordAuthViewModel
 import com.test.testing.ui.theme.TestingTheme
 
 class DiscordMainActivity : ComponentActivity() {
@@ -76,7 +80,7 @@ private fun DiscordContent(
     ) {
         when (tab) {
             DiscordTab.MAP -> DiscordMapPlaceholder()
-            DiscordTab.SETTINGS -> DiscordSettingsPlaceholder()
+            DiscordTab.SETTINGS -> DiscordSettingsScreen()
         }
     }
 }
@@ -91,12 +95,34 @@ private fun DiscordMapPlaceholder() {
 }
 
 @Composable
-private fun DiscordSettingsPlaceholder() {
+private fun DiscordSettingsScreen(
+    vm: DiscordAuthViewModel =
+        viewModel(
+            factory =
+                DiscordAuthViewModelFactory(
+                    androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application,
+                ),
+        ),
+) {
+    val userState = vm.user.collectAsState()
+    LaunchedEffect(Unit) { vm.loadCurrentUser() }
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = "Discord Settings (placeholder)",
             style = MaterialTheme.typography.headlineSmall,
         )
         Spacer(modifier = Modifier.height(8.dp))
+        Greeting(userState.value)
+    }
+}
+
+@Composable
+private fun Greeting(user: com.test.testing.discord.api.model.User?) {
+    if (user != null) {
+        Text(
+            text = "Hello, ${user.duser.username}",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(16.dp),
+        )
     }
 }

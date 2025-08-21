@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.test.testing.discord.api.ApiClient
+import com.test.testing.discord.api.model.User
+import com.test.testing.discord.repo.RepositoryFactory
+import com.test.testing.discord.repo.UserRepository
 import com.test.testing.discord.repo.UserRepositoryImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -38,8 +41,16 @@ class DiscordAuthViewModelFactory(
 class DiscordAuthViewModel(
     private val repo: DiscordAuthRepository,
     private val app: Application,
+    private val userRepo: UserRepository,
 ) : ViewModel() {
     val state = MutableStateFlow<AuthState>(AuthState.Idle)
+    val user = MutableStateFlow<User?>(null)
+
+    constructor(repo: DiscordAuthRepository, app: Application) : this(
+        repo,
+        app,
+        RepositoryFactory.createUserRepository(),
+    )
 
     fun onCallback(
         code: String,
@@ -63,6 +74,12 @@ class DiscordAuthViewModel(
                     onSuccess = { AuthState.Success(it) },
                     onFailure = { AuthState.Error("Token exchange failed") },
                 )
+        }
+    }
+
+    fun loadCurrentUser() {
+        viewModelScope.launch {
+            user.value = userRepo.getCurrentUser().getOrNull()
         }
     }
 }
