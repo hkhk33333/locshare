@@ -60,6 +60,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("boolean", "USE_DISCORD_SYSTEM", "false")
         buildConfigField("String", "DISCORD_BACKEND_URL", "\"https://miniworld-new-staging.up.railway.app/\"")
+        buildConfigField("String", "DISCORD_CLIENT_ID", "\"1232840493696680038\"")
+        buildConfigField("String", "DISCORD_REDIRECT_URI", "\"mysku://redirect\"")
     }
 
     buildTypes {

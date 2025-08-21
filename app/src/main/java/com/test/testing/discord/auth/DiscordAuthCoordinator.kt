@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.util.Base64
+import androidx.core.net.toUri
 import java.security.SecureRandom
 
 /**
@@ -14,12 +15,30 @@ import java.security.SecureRandom
  */
 object DiscordAuthCoordinator {
     private const val AUTH_BASE = "https://discord.com/api/oauth2/authorize"
-
-    // Aligned with iOS Constants.swift
-    private const val CLIENT_ID = "1232840493696680038"
-    private const val REDIRECT_URI = "mysku://redirect"
     private const val RESPONSE_TYPE = "code"
     private const val SCOPE = "identify guilds"
+
+    private val CLIENT_ID: String
+        get() = com.test.testing.BuildConfig.DISCORD_CLIENT_ID
+
+    private val REDIRECT_URI: String
+        get() = com.test.testing.BuildConfig.DISCORD_REDIRECT_URI
+
+    internal fun buildAuthUri(
+        codeChallenge: String,
+        state: String,
+    ): Uri =
+        AUTH_BASE
+            .toUri()
+            .buildUpon()
+            .appendQueryParameter("client_id", CLIENT_ID)
+            .appendQueryParameter("redirect_uri", REDIRECT_URI)
+            .appendQueryParameter("response_type", RESPONSE_TYPE)
+            .appendQueryParameter("scope", SCOPE)
+            .appendQueryParameter("code_challenge", codeChallenge)
+            .appendQueryParameter("code_challenge_method", "S256")
+            .appendQueryParameter("state", state)
+            .build()
 
     fun startLogin(activity: Activity) {
         val codeVerifier = generateCodeVerifier()
@@ -30,18 +49,7 @@ object DiscordAuthCoordinator {
         TokenStore.putCodeVerifier(activity, codeVerifier)
         TokenStore.putState(activity, state)
 
-        val uri: Uri =
-            AUTH_BASE
-                .toUri()
-                .buildUpon()
-                .appendQueryParameter("client_id", CLIENT_ID)
-                .appendQueryParameter("redirect_uri", REDIRECT_URI)
-                .appendQueryParameter("response_type", RESPONSE_TYPE)
-                .appendQueryParameter("scope", SCOPE)
-                .appendQueryParameter("code_challenge", codeChallenge)
-                .appendQueryParameter("code_challenge_method", "S256")
-                .appendQueryParameter("state", state)
-                .build()
+        val uri = buildAuthUri(codeChallenge, state)
 
         val intent = Intent(Intent.ACTION_VIEW, uri)
         activity.startActivity(intent)
