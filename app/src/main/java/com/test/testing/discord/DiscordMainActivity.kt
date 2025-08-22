@@ -23,10 +23,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.test.testing.discord.auth.DiscordAuthViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.test.testing.discord.settings.DiscordSettingsViewModel
 import com.test.testing.ui.theme.TestingTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DiscordMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,17 +97,11 @@ private fun DiscordMapPlaceholder() {
 }
 
 @Composable
-private fun DiscordSettingsScreen(
-    vm: DiscordAuthViewModel =
-        viewModel(
-            factory =
-                DiscordAuthViewModelFactory(
-                    androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application,
-                ),
-        ),
-) {
+private fun DiscordSettingsScreen() {
+    val vm: DiscordSettingsViewModel = hiltViewModel()
     val userState = vm.user.collectAsState()
-    LaunchedEffect(Unit) { vm.loadCurrentUser() }
+    val countState = vm.guildCount.collectAsState()
+    LaunchedEffect(Unit) { vm.load() }
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
             text = "Discord Settings (placeholder)",
@@ -113,6 +109,7 @@ private fun DiscordSettingsScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Greeting(userState.value)
+        Text(text = "Guilds: ${countState.value}")
     }
 }
 
