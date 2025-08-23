@@ -5,6 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
+import com.test.testing.discord.auth.SecureTokenStore
 import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -30,6 +31,13 @@ class LocShareApp : Application() {
             Log.d(TAG, "Firebase initialized successfully")
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing Firebase", e)
+        }
+
+        // Migrate any plain token to secure storage
+        try {
+            SecureTokenStore.migrateFromPlain(this)
+        } catch (e: Exception) {
+            Log.w(TAG, "Secure token migration failed", e)
         }
     }
 }
