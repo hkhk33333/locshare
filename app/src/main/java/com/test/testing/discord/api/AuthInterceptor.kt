@@ -1,6 +1,7 @@
 package com.test.testing.discord.api
 
 import android.content.Context
+import com.test.testing.discord.auth.AuthEvents
 import com.test.testing.discord.auth.SecureTokenStore
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -23,6 +24,12 @@ class AuthInterceptor(
             } else {
                 chain.request()
             }
-        return chain.proceed(request)
+        val response = chain.proceed(request)
+        if (response.code == 401) {
+            // Clear token and notify listeners to re-authenticate
+            SecureTokenStore.clear(appContext)
+            AuthEvents.authRequired.tryEmit(Unit)
+        }
+        return response
     }
 }
