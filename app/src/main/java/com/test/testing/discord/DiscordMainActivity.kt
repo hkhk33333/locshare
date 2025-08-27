@@ -1,5 +1,6 @@
 package com.test.testing.discord
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,9 +25,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.test.testing.discord.auth.AuthEvents
+import com.test.testing.discord.auth.DiscordLoginActivity
 import com.test.testing.discord.settings.DiscordSettingsViewModel
 import com.test.testing.ui.theme.TestingTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class DiscordMainActivity : ComponentActivity() {
@@ -36,6 +43,15 @@ class DiscordMainActivity : ComponentActivity() {
         setContent {
             TestingTheme {
                 DiscordShell()
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                AuthEvents.authRequired.collect {
+                    startActivity(Intent(this@DiscordMainActivity, DiscordLoginActivity::class.java))
+                    finish()
+                }
             }
         }
     }
