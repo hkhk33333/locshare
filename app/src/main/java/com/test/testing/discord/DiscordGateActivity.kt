@@ -24,14 +24,23 @@ class DiscordGateActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TestingTheme {
-                DiscordPlaceholder(onClose = { finish() })
+                DiscordPlaceholder(
+                    onClose = { finish() },
+                    onContinue = {
+                        startActivity(android.content.Intent(this, DiscordMainActivity::class.java))
+                        finish()
+                    },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun DiscordPlaceholder(onClose: () -> Unit) {
+private fun DiscordPlaceholder(
+    onClose: () -> Unit,
+    onContinue: () -> Unit,
+) {
     Column(
         modifier =
             Modifier
@@ -57,6 +66,12 @@ private fun DiscordPlaceholder(onClose: () -> Unit) {
             modifier = Modifier.padding(top = 24.dp),
         ) {
             Text(text = "Back")
+        }
+        Button(
+            onClick = onContinue,
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
+            Text(text = "Continue")
         }
     }
 }
