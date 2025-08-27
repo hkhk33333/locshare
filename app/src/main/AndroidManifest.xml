@@ -55,6 +55,12 @@
                     android:scheme="mysku" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".discord.settings.DiscordSettingsActivity"
+            android:exported="false"
+            android:label="Settings"
+            android:theme="@style/Theme.Testing"
+            android:parentActivityName=".discord.DiscordMainActivity" />
         
         <service
             android:name=".LocationService"
