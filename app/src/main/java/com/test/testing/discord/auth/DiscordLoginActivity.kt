@@ -18,8 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import com.test.testing.BuildConfig
 import com.test.testing.discord.DiscordMainActivity
+import com.test.testing.discord.api.ApiClient
+import com.test.testing.discord.api.model.TokenRequest
 import com.test.testing.ui.theme.TestingTheme
+import kotlinx.coroutines.launch
 
 class DiscordLoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,6 +78,25 @@ private fun DiscordLoginScreen(onContinue: () -> Unit) {
             modifier = Modifier.padding(top = 12.dp),
         ) {
             Text(text = "Start OAuth (browser)")
+        }
+
+        // Demo-mode quick path via backend /token (code = "demo")
+        if (BuildConfig.DISCORD_DEMO_MODE) {
+            Button(
+                onClick = {
+                    val act = (context as androidx.activity.ComponentActivity)
+                    act.lifecycleScope.launch {
+                        val api = ApiClient.create(act)
+                        val resp = api.exchangeToken(TokenRequest("demo", "demo", BuildConfig.DISCORD_REDIRECT_URI))
+                        SecureTokenStore.put(act, resp.accessToken)
+                        act.startActivity(Intent(act, DiscordMainActivity::class.java))
+                        act.finish()
+                    }
+                },
+                modifier = Modifier.padding(top = 12.dp),
+            ) {
+                Text(text = "Try Demo (no account)")
+            }
         }
 
         Button(
