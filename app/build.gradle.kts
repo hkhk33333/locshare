@@ -59,6 +59,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("boolean", "USE_DISCORD_SYSTEM", "false")
+        buildConfigField("String", "DISCORD_BACKEND_URL", "\"https://miniworld-new-staging.up.railway.app/\"")
     }
 
     buildTypes {
