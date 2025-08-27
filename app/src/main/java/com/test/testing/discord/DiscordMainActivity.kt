@@ -6,31 +6,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+// import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.test.testing.discord.auth.AuthEvents
 import com.test.testing.discord.auth.DiscordLoginActivity
-import com.test.testing.discord.settings.DiscordSettingsViewModel
 import com.test.testing.ui.theme.TestingTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -42,7 +41,10 @@ class DiscordMainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TestingTheme {
-                DiscordShell()
+                DiscordShell(
+                    onOpenSettings = { /* TODO */ },
+                    onRecenter = { /* TODO */ },
+                )
             }
         }
 
@@ -57,49 +59,26 @@ class DiscordMainActivity : ComponentActivity() {
     }
 }
 
-private enum class DiscordTab { MAP, SETTINGS }
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DiscordShell() {
-    val (currentTab, setCurrentTab) = remember { mutableStateOf(DiscordTab.MAP) }
-
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = currentTab == DiscordTab.MAP,
-                    onClick = { setCurrentTab(DiscordTab.MAP) },
-                    label = { Text("Map") },
-                    icon = { },
-                )
-                NavigationBarItem(
-                    selected = currentTab == DiscordTab.SETTINGS,
-                    onClick = { setCurrentTab(DiscordTab.SETTINGS) },
-                    label = { Text("Settings") },
-                    icon = { },
-                )
-            }
-        },
-    ) { innerPadding ->
-        DiscordContent(innerPadding = innerPadding, tab = currentTab)
-    }
-}
-
-@Composable
-private fun DiscordContent(
-    innerPadding: PaddingValues,
-    tab: DiscordTab,
+private fun DiscordShell(
+    onOpenSettings: () -> Unit,
+    onRecenter: () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-    ) {
-        when (tab) {
-            DiscordTab.MAP -> DiscordMapPlaceholder()
-            DiscordTab.SETTINGS -> DiscordSettingsScreen()
-        }
+    val snackbar = remember { SnackbarHostState() }
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Discord") },
+                actions = { IconButton(onClick = onOpenSettings) { Icon(Icons.Filled.Settings, contentDescription = "Settings") } },
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onRecenter) { Text("My location") }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbar) },
+    ) { inner ->
+        Box(Modifier.fillMaxSize().padding(inner)) { DiscordMapPlaceholder() }
     }
 }
 
@@ -112,30 +91,6 @@ private fun DiscordMapPlaceholder() {
     )
 }
 
-@Composable
-private fun DiscordSettingsScreen() {
-    val vm: DiscordSettingsViewModel = hiltViewModel()
-    val userState = vm.user.collectAsState()
-    val countState = vm.guildCount.collectAsState()
-    LaunchedEffect(Unit) { vm.load() }
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(
-            text = "Discord Settings (placeholder)",
-            style = MaterialTheme.typography.headlineSmall,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Greeting(userState.value)
-        Text(text = "Guilds: ${countState.value}")
-    }
-}
+// Settings screen will be revisited when navigation to Settings is wired.
 
-@Composable
-private fun Greeting(user: com.test.testing.discord.api.model.User?) {
-    if (user != null) {
-        Text(
-            text = "Hello, ${user.duser.username}",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-}
+// Greeting composable will be reintroduced when Settings wiring returns
