@@ -1,6 +1,9 @@
 package com.test.testing.discord.auth
 
 import android.app.Application
+import com.test.testing.discord.api.model.DiscordUser
+import com.test.testing.discord.api.model.PrivacySettings
+import com.test.testing.discord.api.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -28,6 +31,19 @@ private class FakeRepoFailure : DiscordAuthRepository {
         codeVerifier: String,
         redirectUri: String,
     ): Result<String> = Result.failure(IllegalStateException("boom"))
+}
+
+private class FakeUserRepo : com.test.testing.discord.repo.UserRepository {
+    override suspend fun getCurrentUser(): Result<User> =
+        Result.success(
+            User(
+                id = "1",
+                location = null,
+                duser = DiscordUser("1", "neo", null),
+                privacy = PrivacySettings(emptyList(), emptyList()),
+                pushToken = null,
+            ),
+        )
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -81,5 +97,22 @@ class DiscordAuthViewModelTest {
             vm.onCallback("code", null)
             testDispatcher.scheduler.advanceUntilIdle()
             assertEquals(AuthState.Error("Token exchange failed"), vm.state.value)
+        }
+
+    @Test
+    fun `loadCurrentUser updates user state on success`() =
+        runTest {
+            val app =
+                androidx.test.core.app.ApplicationProvider
+                    .getApplicationContext<Application>()
+            val vm = DiscordAuthViewModel(FakeRepoSuccess(), app, FakeUserRepo())
+            vm.loadCurrentUser()
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertEquals(
+                "neo",
+                vm.user.value
+                    ?.duser
+                    ?.username,
+            )
         }
 }
