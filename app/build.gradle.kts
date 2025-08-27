@@ -38,6 +38,8 @@ plugins {
     id("com.google.gms.google-services")
     alias(libs.plugins.kover)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 java {
@@ -123,6 +125,9 @@ dependencies {
 
     // Lifecycle and ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.okhttp3.mockwebserver)
