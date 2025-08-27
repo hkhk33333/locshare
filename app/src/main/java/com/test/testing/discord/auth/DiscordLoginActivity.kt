@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.test.testing.discord.DiscordMainActivity
@@ -65,6 +66,15 @@ private fun DiscordLoginScreen(onContinue: () -> Unit) {
         ) {
             Text(text = "Continue with Discord")
         }
+
+        val context = LocalContext.current
+        Button(
+            onClick = { DiscordAuthCoordinator.startLogin(activity = (context as androidx.activity.ComponentActivity)) },
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
+            Text(text = "Start OAuth (browser)")
+        }
+
         Button(
             onClick = onContinue,
             modifier = Modifier.padding(top = 12.dp),
