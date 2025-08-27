@@ -1,18 +1,18 @@
 package com.test.testing.discord.api
 
 import android.content.Context
-import com.test.testing.discord.auth.TokenStore
+import com.test.testing.discord.auth.SecureTokenStore
 import okhttp3.Interceptor
 import okhttp3.Response
 
 /**
- * Adds Authorization header if a token exists (skeleton).
+ * Adds Authorization header if a token exists.
  */
 class AuthInterceptor(
     private val appContext: Context,
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = TokenStore.get(appContext)
+        val token = SecureTokenStore.get(appContext)
         val request =
             if (!token.isNullOrEmpty()) {
                 chain
