@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,19 +33,14 @@ class DiscordLoginActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TestingTheme {
-                DiscordLoginScreen(
-                    onContinue = {
-                        startActivity(Intent(this, DiscordMainActivity::class.java))
-                        finish()
-                    },
-                )
+                DiscordLoginScreen()
             }
         }
     }
 }
 
 @Composable
-private fun DiscordLoginScreen(onContinue: () -> Unit) {
+private fun DiscordLoginScreen() {
     Column(
         modifier =
             Modifier
@@ -59,51 +55,45 @@ private fun DiscordLoginScreen(onContinue: () -> Unit) {
             textAlign = TextAlign.Center,
         )
         Text(
-            text = "This is a stub screen; OAuth will be wired in later PRs.",
+            text = "Opens Discord to sign in.",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(top = 8.dp),
             textAlign = TextAlign.Center,
         )
 
+        val context = LocalContext.current
         Button(
-            onClick = onContinue,
+            onClick = { DiscordAuthCoordinator.startLogin(activity = (context as ComponentActivity)) },
             modifier = Modifier.padding(top = 24.dp),
         ) {
             Text(text = "Continue with Discord")
         }
 
-        val context = LocalContext.current
-        Button(
-            onClick = { DiscordAuthCoordinator.startLogin(activity = (context as androidx.activity.ComponentActivity)) },
-            modifier = Modifier.padding(top = 12.dp),
-        ) {
-            Text(text = "Start OAuth (browser)")
-        }
-
-        // Demo-mode quick path via backend /token (code = "demo")
+        // Debug-only demo link (text)
         if (BuildConfig.DISCORD_DEMO_MODE) {
-            Button(
-                onClick = {
-                    val act = (context as androidx.activity.ComponentActivity)
-                    act.lifecycleScope.launch {
-                        val api = ApiClient.create(act)
-                        val resp = api.exchangeToken(TokenRequest("demo", "demo", BuildConfig.DISCORD_REDIRECT_URI))
-                        SecureTokenStore.put(act, resp.accessToken)
-                        act.startActivity(Intent(act, DiscordMainActivity::class.java))
-                        act.finish()
-                    }
-                },
-                modifier = Modifier.padding(top = 12.dp),
-            ) {
-                Text(text = "Try Demo (no account)")
-            }
-        }
-
-        Button(
-            onClick = onContinue,
-            modifier = Modifier.padding(top = 12.dp),
-        ) {
-            Text(text = "Continue")
+            Text(
+                text = "Try demo (debug)",
+                modifier =
+                    Modifier
+                        .padding(top = 12.dp)
+                        .clickable {
+                            val act = (context as ComponentActivity)
+                            act.lifecycleScope.launch {
+                                val api = ApiClient.create(act)
+                                val resp =
+                                    api.exchangeToken(
+                                        TokenRequest(
+                                            "demo",
+                                            "demo",
+                                            BuildConfig.DISCORD_REDIRECT_URI,
+                                        ),
+                                    )
+                                SecureTokenStore.put(act, resp.accessToken)
+                                act.startActivity(Intent(act, DiscordMainActivity::class.java))
+                                act.finish()
+                            }
+                        },
+            )
         }
     }
 }
