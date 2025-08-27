@@ -26,6 +26,10 @@ object DiscordAuthCoordinator {
         val codeChallenge = codeVerifier.toCodeChallenge()
         val state = generateState()
 
+        // Persist verifier/state for callback validation and token exchange later
+        TokenStore.putCodeVerifier(activity, codeVerifier)
+        TokenStore.putState(activity, state)
+
         val uri: Uri =
             AUTH_BASE
                 .toUri()
