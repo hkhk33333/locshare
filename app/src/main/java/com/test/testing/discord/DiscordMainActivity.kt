@@ -30,6 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.test.testing.discord.auth.AuthEvents
 import com.test.testing.discord.auth.DiscordLoginActivity
+import com.test.testing.discord.settings.DiscordSettingsActivity
 import com.test.testing.ui.theme.TestingTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -42,8 +43,9 @@ class DiscordMainActivity : ComponentActivity() {
         setContent {
             TestingTheme {
                 DiscordShell(
-                    onOpenSettings = { /* TODO */ },
-                    onRecenter = { /* TODO */ },
+                    onOpenSettings = {
+                        startActivity(Intent(this, DiscordSettingsActivity::class.java))
+                    },
                 )
             }
         }
@@ -61,24 +63,31 @@ class DiscordMainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DiscordShell(
-    onOpenSettings: () -> Unit,
-    onRecenter: () -> Unit,
-) {
+private fun DiscordShell(onOpenSettings: () -> Unit) {
     val snackbar = remember { SnackbarHostState() }
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Discord") },
-                actions = { IconButton(onClick = onOpenSettings) { Icon(Icons.Filled.Settings, contentDescription = "Settings") } },
+                title = { Text("MySku") },
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                },
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onRecenter) { Text("My location") }
+            FloatingActionButton(onClick = {
+                // Recenter functionality will be implemented later
+            }) {
+                Text("My location")
+            }
         },
         snackbarHost = { SnackbarHost(hostState = snackbar) },
     ) { inner ->
-        Box(Modifier.fillMaxSize().padding(inner)) { DiscordMapPlaceholder() }
+        Box(Modifier.fillMaxSize().padding(inner)) {
+            DiscordMapPlaceholder()
+        }
     }
 }
 
@@ -90,7 +99,3 @@ private fun DiscordMapPlaceholder() {
         modifier = Modifier.padding(16.dp),
     )
 }
-
-// Settings screen will be revisited when navigation to Settings is wired.
-
-// Greeting composable will be reintroduced when Settings wiring returns
