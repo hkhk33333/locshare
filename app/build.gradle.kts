@@ -64,6 +64,7 @@ android {
         buildConfigField("String", "DISCORD_BACKEND_URL", "\"https://miniworld-new-staging.up.railway.app/\"")
         buildConfigField("String", "DISCORD_CLIENT_ID", "\"1232840493696680038\"")
         buildConfigField("String", "DISCORD_REDIRECT_URI", "\"mysku://redirect\"")
+        buildConfigField("boolean", "DISCORD_DEMO_MODE", "false")
     }
 
     buildTypes {
@@ -77,6 +78,7 @@ android {
         }
         debug {
             buildConfigField("boolean", "USE_DISCORD_SYSTEM", "false")
+            buildConfigField("boolean", "DISCORD_DEMO_MODE", "true")
         }
     }
     compileOptions {

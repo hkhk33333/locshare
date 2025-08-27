@@ -81,20 +81,22 @@ private fun DiscordLoginScreen(onContinue: () -> Unit) {
         }
 
         // Demo-mode quick path via backend /token (code = "demo")
-        Button(
-            onClick = {
-                val act = (context as androidx.activity.ComponentActivity)
-                act.lifecycleScope.launch {
-                    val api = ApiClient.create(act)
-                    val resp = api.exchangeToken(TokenRequest("demo", "demo", BuildConfig.DISCORD_REDIRECT_URI))
-                    SecureTokenStore.put(act, resp.accessToken)
-                    act.startActivity(Intent(act, DiscordMainActivity::class.java))
-                    act.finish()
-                }
-            },
-            modifier = Modifier.padding(top = 12.dp),
-        ) {
-            Text(text = "Try Demo (no account)")
+        if (BuildConfig.DISCORD_DEMO_MODE) {
+            Button(
+                onClick = {
+                    val act = (context as androidx.activity.ComponentActivity)
+                    act.lifecycleScope.launch {
+                        val api = ApiClient.create(act)
+                        val resp = api.exchangeToken(TokenRequest("demo", "demo", BuildConfig.DISCORD_REDIRECT_URI))
+                        SecureTokenStore.put(act, resp.accessToken)
+                        act.startActivity(Intent(act, DiscordMainActivity::class.java))
+                        act.finish()
+                    }
+                },
+                modifier = Modifier.padding(top = 12.dp),
+            ) {
+                Text(text = "Try Demo (no account)")
+            }
         }
 
         Button(
