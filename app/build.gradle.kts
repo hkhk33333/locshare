@@ -54,7 +54,7 @@ android {
     defaultConfig {
         applicationId = "com.test.testing"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -184,6 +184,7 @@ detekt {
     autoCorrect = true
 }
 
+// Ensure CI artifact uploads have reports available
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     reports {
         xml.required.set(false)

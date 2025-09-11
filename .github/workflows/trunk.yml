@@ -21,9 +21,13 @@ jobs:
     permissions:
       contents: read
       checks: write
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
       - name: Run Trunk Check
         uses: trunk-io/trunk-action@v1
+        with:
+          check-mode: ${{ github.event_name == 'push' && 'all' || null }}
+          arguments: --github-annotate-new-only=false
